@@ -63,12 +63,13 @@ if __name__ == '__main__':
 
 			# Lidar measurements
 			msgScan = rospy.wait_for_message('/scan', LaserScan)
+			#distances, angles均为列表，表示车身坐标系下激光点相对原点距离和角度
 			distances, angles, information = lidar_scan(msgScan)  # distances in [m], angles in [radians]
 
-			# Odometry measurements
+			# Odometry measurements-里程计测量本车位姿数据
 			msgOdom = rospy.wait_for_message('/odom', Odometry)
-			x_odom, y_odom = get_odom_position(msgOdom)   # x,y in [m]
-			theta_odom = get_odom_orientation(msgOdom)    # theta in [radians]
+			x_odom, y_odom = get_odom_position(msgOdom)   # x,y in [m]-本车位置数据
+			theta_odom = get_odom_orientation(msgOdom)    # theta in [radians]-本车旋转角
 
 			# Lidar measurements in X-Y plane
 			distances_x, distances_y = lidar_scan_xy(distances, angles, x_odom, y_odom, theta_odom)
@@ -82,7 +83,7 @@ if __name__ == '__main__':
 
 			for (dist_x, dist_y, dist) in zip(distances_x, distances_y, distances):
 
-				# x2 and y2 for Bresenham's algorithm
+				# x2 and y2 for Bresenham's algorithm-离散化为整数
 				x2, y2 = gridMap.discretize(dist_x, dist_y)
 
 				# draw a discrete line of free pixels, [robot position -> laser hit spot)
