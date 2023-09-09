@@ -1,5 +1,9 @@
 #!/usr/bin/env python
-
+# TODO0:
+# 本次工作是以本程序为参考代码修改出一版仿真器能用的GridMap算法程序
+# 在此之前大致了解一下本算法，最终效果能实时显示占用栅格图即可
+# TODO1:
+# 由于仿真器并未设置ros接口，因此本程序中所有用到rospy库函数的均需要删除并根据具体中文注释进行修改
 import rospy
 
 import numpy as np
@@ -24,7 +28,6 @@ RESOLUTION = 0.03 # Grid resolution in [m]
 MAP_NAME  = 'world' # map name without extension
 
 if __name__ == '__main__':
-
 	try:
 
 		# Init map parameters
@@ -62,15 +65,24 @@ if __name__ == '__main__':
 		while not rospy.is_shutdown():
 
 			# Lidar measurements
+			# TODO2:
+			# 这里需要用vsim的getLidarData（用单线激光雷达即可）获取点云数据
+			# 计算/获取数据填到distances, angles, information变量中
 			msgScan = rospy.wait_for_message('/scan', LaserScan)
-			#distances, angles均为列表，表示车身坐标系下激光点相对原点距离和角度
+			# lidar_scan函数见utils.py，distances, angles和information均为list类型
+			# 表示车身坐标系下激光点相对原点距离和角度以及置信度（置信度后续没用到无所谓）
 			distances, angles, information = lidar_scan(msgScan)  # distances in [m], angles in [radians]
 
 			# Odometry measurements-里程计测量本车位姿数据
+			# TODO3:
+			# 这里需要用vsim的simGetGroundTruthKinematic获取本车位姿并赋值到x_odom, y_odom, theta_odom
 			msgOdom = rospy.wait_for_message('/odom', Odometry)
 			x_odom, y_odom = get_odom_position(msgOdom)   # x,y in [m]-本车位置数据
 			theta_odom = get_odom_orientation(msgOdom)    # theta in [radians]-本车旋转角
-
+			# TODO4:
+			# 由于不清楚本程序坐标系，所以等跑通后观察栅格地图占用情况是否与仿真器中一致
+			# 若不一致则在TODO2/3处修改坐标系加负号或调换顺序等
+			# 后续代码基本无需替换，只需要删除无用代码
 			# Lidar measurements in X-Y plane
 			distances_x, distances_y = lidar_scan_xy(distances, angles, x_odom, y_odom, theta_odom)
 
